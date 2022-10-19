@@ -1,0 +1,116 @@
+<?php
+session_start();
+require_once("../../setting/koneksi.php");
+require('../../FPDF/fpdf.php');
+date_default_timezone_set('Asia/Jakarta');
+
+$query1 = $conn->prepare("SELECT pembayaran.*, tarif.*, pelanggan.*, tagihan.* FROM pembayaran, tarif, pelanggan, tagihan WHERE pembayaran.idpel=pelanggan.idpel AND pelanggan.idtarif=tarif.idtarif AND pelanggan.idpel=tagihan.idpel AND pembayaran.idbayar=?");
+$query1->bindParam(1, $_POST['idbayar'], PDO::PARAM_STR|PDO::PARAM_INPUT_OUTPUT, 4000);
+$query1->execute();
+$data1 = $query1->fetch(PDO::FETCH_ASSOC);
+$rpnominal="Rp ".number_format($data1['totalpenggunaan'], "2", ",", ".");
+$adminbank="Rp ".number_format($data1['biayaadmin'], "2", ",", ".");
+$totalbayar="Rp ".number_format($data1['totalbayar'], "2", ",", ".");
+$bayar="Rp ".number_format($data1['bayar'], "2", ",", ".");
+$kembali="Rp ".number_format($data1['kembali'], "2", ",", ".");
+                   
+
+$pdf = new FPDF('P','mm','A4');
+$pdf->AddPage();
+
+$pdf->Image('../../images/logo.png',25,8,20);
+$pdf->SetFont('Arial','B',15);
+$pdf->Cell(190,9,'Struk Pembayaran',0,0,'C');
+$pdf->Ln(6);
+$pdf->Cell(190,9,'Payment Point Online Bank Surya Mandiri',0,0,'C');
+$pdf->SetFont('Arial','B',10);
+$pdf->Ln(6);
+$pdf->Cell(190,9,'Sekretariat : Jl. Gunung Anyar Lor Kencana III B/19 Surabaya',0,0,'C');
+$pdf->Ln(10);
+$pdf->Cell(190,0.1,'',1,1,'C');
+$pdf->SetFont('Arial','',10);
+$pdf->Ln(20);
+$Y_Fields_Name_position = 27;
+
+$pdf->SetFillColor(210,221,242);
+
+$pdf->SetY($Y_Fields_Name_position);
+$pdf->Ln(10);
+$waktu=date("d-m-Y H:i:s");
+$pdf->SetX(10);
+$pdf->Cell(30, 8, 'NO METER', 0, 0, 'L', 0);
+$pdf->SetX(40);
+$pdf->Cell(30, 8, ':', 0, 0, 'L', 0);
+$pdf->SetX(50);
+$pdf->Cell(85, 8, $data1['nometer'], 0, 0, 'L', 0);
+$pdf->SetX(130);
+$pdf->Cell(30, 8, 'DAYA', 0, 0, 'L', 0);
+$pdf->SetX(155);
+$pdf->Cell(30, 8, ':', 0, 0, 'L', 0);
+$pdf->SetX(165);
+$pdf->Cell(85, 8, $data1['daya']." VA", 0, 0, 'L', 0);
+$pdf->Ln(6);
+$pdf->SetX(10);
+$pdf->Cell(30, 8, 'ID PELANGGAN', 0, 0, 'L', 0);
+$pdf->SetX(40);
+$pdf->Cell(30, 8, ':', 0, 0, 'L', 0);
+$pdf->SetX(50);
+$pdf->Cell(85, 8, $data1['idpel'], 0, 0, 'L', 0);
+$pdf->SetX(130);
+$pdf->Cell(30, 8, 'JUMLAH KWH', 0, 0, 'L', 0);
+$pdf->SetX(155);
+$pdf->Cell(30, 8, ':', 0, 0, 'L', 0);
+$pdf->SetX(165);
+$pdf->Cell(85, 8, $data1['jumlahmeter'], 0, 0, 'L', 0);
+$pdf->Ln(6);
+$pdf->SetX(10);
+$pdf->Cell(30, 8, 'NAMA', 0, 0, 'L', 0);
+$pdf->SetX(40);
+$pdf->Cell(30, 8, ':', 0, 0, 'L', 0);
+$pdf->SetX(50);
+$pdf->Cell(85, 8, $data1['nm_pel'], 0, 0, 'L', 0);
+$pdf->SetX(130);
+$pdf->Cell(30, 8, 'RP NOMINAL', 0, 0, 'L', 0);
+$pdf->SetX(155);
+$pdf->Cell(30, 8, ':', 0, 0, 'L', 0);
+$pdf->SetX(165);
+$pdf->Cell(85, 8, $rpnominal, 0, 0, 'L', 0);
+$pdf->Ln(8);
+$pdf->SetFont('Arial','',8);
+$pdf->SetX(90);
+$pdf->Cell(30, 8, 'PLN Menyatakan struk ini sebagai bukti pembayaran yang sah', 0, 0, 'C');
+$pdf->Ln(6);
+$pdf->SetFont('Arial','',10);
+$pdf->SetX(10);
+$pdf->Cell(30, 8, 'ADMIN BANK', 0, 0, 'L', 0);
+$pdf->SetX(40);
+$pdf->Cell(30, 8, ':', 0, 0, 'L', 0);
+$pdf->SetX(50);
+$pdf->Cell(85, 8, $adminbank, 0, 0, 'L', 0);
+$pdf->SetX(130);
+$pdf->Cell(30, 8, 'BAYAR', 0, 0, 'L', 0);
+$pdf->SetX(155);
+$pdf->Cell(30, 8, ':', 0, 0, 'L', 0);
+$pdf->SetX(165);
+$pdf->Cell(85, 8, $bayar, 0, 0, 'L', 0);
+$pdf->Ln(6);
+$pdf->SetX(10);
+$pdf->Cell(30, 8, 'TOTAL BIAYA', 0, 0, 'L', 0);
+$pdf->SetX(40);
+$pdf->Cell(30, 8, ':', 0, 0, 'L', 0);
+$pdf->SetX(50);
+$pdf->Cell(85, 8, $totalbayar, 0, 0, 'L', 0);
+$pdf->SetX(130);
+$pdf->Cell(30, 8, 'KEMBALI', 0, 0, 'L', 0);
+$pdf->SetX(155);
+$pdf->Cell(30, 8, ':', 0, 0, 'L', 0);
+$pdf->SetX(165);
+$pdf->Cell(85, 8, $kembali, 0, 0, 'L', 0);
+$pdf->Ln(8);
+$pdf->SetFont('Arial','',8);
+$pdf->SetX(90);
+$pdf->Cell(30, 8, 'PPOB Surya Mandiri / tanggal '.$waktu, 0, 0, 'C');
+
+$pdf->Output();
+//"data_siswa".".pdf",'D'
+?>
